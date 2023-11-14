@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,15 +38,7 @@
       font-size: 16px;
     }
   </style>
-   <script type="text/javascript" src="https://cloudfront.loggly.com/js/loggly.tracker-2.2.4.min.js" async></script>
-  <script>
-      var _LTracker = _LTracker || [];
-      _LTracker.push({
-          'logglyKey': 'be17278a-8c7e-4b7a-9c49-3dd791efdc08',
-          'sendConsoleErrors': true,
-          'tag': 'loggly-jslogger',
-      });
-  </script>
+ 
 </head>
 <body>
 
@@ -76,13 +69,34 @@
 
         // Display the time taken in the console (you can send this data to a server instead)
         console.log('Time taken to close the popup: ' + timeTaken + ' milliseconds');
-
+        const logData=console.log
         // Hide the popup after closing
         document.getElementById('popup-container').style.display = 'none';
       });
     }, delayTime);
   });
 </script>
+<script type="text/javascript">
+
+  const logData = {
+    eventType: 'click',
+    timeTaken: 5000, // replace with actual time taken
+    // Add other relevant data
+  };
+  
+  fetch('http://logs-01.loggly.com/bulk/be17278a-8c7e-4b7a-9c49-3dd791efdc08/tag/bulk/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(logData),
+  })
+    .then(response => response.json())
+    .then(data => console.log('Log data sent successfully:', data))
+    .catch(error => console.error('Error sending log data:', error));
+  
+  </script>
+  
 
 </body>
 </html>
