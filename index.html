@@ -1,32 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Popup Timer</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #f4f4f4;
-    }
-
-    #popup-container {
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Timer</title>
+    <style>
+        #popup {
       display: none;
       position: fixed;
-      top: 50%;
-      left: 50%;
+      top: 65%;
+      left: 65%;
       transform: translate(-50%, -50%);
-      padding: 20px;
+      padding: 100px;
+      width: 300px; /* Adjust the width to make the popup wider */
+      height: 200px;
       background-color: #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
       z-index: 999;
+      font-size:50px;
     }
 
     #close-btn {
@@ -34,77 +25,66 @@
       background-color: #3498db;
       color: #fff;
       border: none;
-      padding: 10px;
+      padding: 50px;
       font-size: 16px;
     }
-  </style>
- <script type="text/javascript" src="https://cloudfront.loggly.com/js/loggly.tracker-2.2.4.min.js" async></script>
-<script>
-    var _LTracker = _LTracker || [];
-    _LTracker.push({
-        'logglyKey': 'be17278a-8c7e-4b7a-9c49-3dd791efdc08',
-        'sendConsoleErrors': true,
-        'tag': 'loggly-jslogger',
-    });
-</script>
+    </style>
 </head>
 <body>
 
-<div id="popup-container">
-  <p>This is a popup!</p>
-  <button id="close-btn">Close</button>
+<div id="popup">
+    <p>This is a popup!</p>
+    
+    <button id="close-btn" onclick="closePopup()">Close</button>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Set the time delay before showing the popup (in milliseconds)
-    const delayTime = 5000; // 5 seconds
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            showPopup();
+            startTimer();
+        }, 5000); // 5000 milliseconds (5 seconds)
+    });
 
-    // Show the popup after the specified delay
-    setTimeout(function () {
-      document.getElementById('popup-container').style.display = 'block';
+    let startTime;
 
-      // Record the start time when the popup is shown
-      const startTime = new Date().getTime();
+    function showPopup() {
+        document.getElementById("popup").style.display = "block";
+    }
 
-      // Attach click event listener to the close button
-      document.getElementById('close-btn').addEventListener('click', function () {
-        // Record the time when the popup is closed
+    function startTimer() {
+        startTime = new Date().getTime();
+
+        // Update the countdown every 100 milliseconds
+        setInterval(function () {
+            const currentTime = new Date().getTime();
+            const timeSpent = currentTime - startTime;
+        }, 100);
+    }
+
+    function closePopup() {
+        document.getElementById("popup").style.display = "none";
+
+        // Record how long it took the user to close the popup in milliseconds
         const endTime = new Date().getTime();
+        const timeSpent = endTime - startTime;
 
-        // Calculate the time taken to close the popup
-        const timeTaken = endTime - startTime;
+        console.log("Time spent: " + timeSpent + " milliseconds");
 
-        // Display the time taken in the console (you can send this data to a server instead)
-        console.log('Time taken to close the popup: ' + timeTaken + ' milliseconds');
-        const logData=console.log
-        // Hide the popup after closing
-        document.getElementById('popup-container').style.display = 'none';
-      });
-    }, delayTime);
-  });
+        // Send log to Loggly
+        sendToLoggly({ timeSpent });
+    }
+
+    function sendToLoggly(data) {
+        const logglyEndpoint = 'http://logs-01.loggly.com/inputs/be17278a-8c7e-4b7a-9c49-3dd791efdc08/tag/http/';
+        const logMessage = JSON.stringify(data);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', logglyEndpoint, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(logMessage);
+    }
 </script>
-<script type="text/javascript">
-
-  const logData = {
-    eventType: 'click',
-    timeTaken: 5000, // replace with actual time taken
-    // Add other relevant data
-  };
-  
-  fetch('http://logs-01.loggly.com/bulk/be17278a-8c7e-4b7a-9c49-3dd791efdc08/tag/bulk/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(logData),
-  })
-    .then(response => response.json())
-    .then(data => console.log('Log data sent successfully:', data))
-    .catch(error => console.error('Error sending log data:', error));
-  
-  </script>
-  
 
 </body>
 </html>
